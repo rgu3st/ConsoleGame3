@@ -1,0 +1,5 @@
+C:/Users/Me/source/repos/ConsoleGame3/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/Me/source/repos/ConsoleGame3/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/Me/source/repos/ConsoleGame3/out/build/x64-Debug/ConsoleGame3/CMakeFiles/ConsoleGame3.dir
+C:/Users/Me/source/repos/ConsoleGame3/out/build/x64-Debug/ConsoleGame3/CMakeFiles/edit_cache.dir
+C:/Users/Me/source/repos/ConsoleGame3/out/build/x64-Debug/ConsoleGame3/CMakeFiles/rebuild_cache.dir
