@@ -8,6 +8,7 @@
 #define WSAVMAJOR 2
 #define DEFAULTIP "127.0.0.1"
 #define DEFAULTPORT 5353
+#define SOMAXCONN_FORGAME 1
 
 // Ref: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsastartup
 int InitWSA() {
@@ -59,15 +60,22 @@ int InitServer() {
 	if (res == SOCKET_ERROR) {
 		printf("Couldn't bind because of error %d! I REALLY need a better debug print method...\n", WSAGetLastError());
 	}
-	printf("Yep, server setup all good!");
+	if (listen(serverSocket, SOMAXCONN_FORGAME))
+	{
+		printf("listen() failed with error %d\n", WSAGetLastError());
+		return 1;
+	}
+	else
+		printf("listen() is also OK! I am listening now...\n");
+	printf("Yep, Player 1 (server) setup all good!\n");
 	return ALLGOOD;
 }
 
 int InitClient() {
+	printf("Initing client\n");
 	InitWSA();
 	SOCKADDR_IN clientSockAddr;
 	int res;
-	char* greeting = "Player 1: let me in!";
 
 	clientSockAddr.sin_family = AF_INET;
 	clientSockAddr.sin_addr.s_addr = inet_addr(DEFAULTIP);
@@ -81,6 +89,8 @@ int InitClient() {
 		DeinitWSA();
 		return OHNOES;
 	}
+	printf("Player 2 (client) init all good!\n");
+	
 	return ALLGOOD;
 }
 
@@ -88,10 +98,38 @@ int Connect() {
 	if (IS_SERVER) {
 		InitServer();
 		printf("Waiting for player 2...\n");
-		WSAAsyncSelect(serverSocket, HWND_CONSOLE, WSAMainMsg, FD_READ | FD_WRITE);
+		//Does recv "block"??
+		char* localbuff[1024];
+		int res;
+		SOCKET acceptedSock = accept(serverSocket, NULL, NULL);
+		if (acceptedSock == INVALID_SOCKET) {
+			printf("Crap: baad socket.");
+			return OHNOES;
+		}
+		while (TRUE){
+			res = recv(acceptedSock, localbuff, 1024, NULL);
+			if (res == SOCKET_ERROR) printf("Bad recv! Error num: %d\n", WSAGetLastError());
+			else {
+				printf("\nBuff recieved: \n%s\n", localbuff);
+				break;
+			}
+			Sleep(1000);
+		}
 	}
+	//WSAAsyncSelect(serverSocket, HWND_CONSOLE, WSAMainMsg, FD_READ | FD_WRITE);
+	
 	else {
+		char* greeting = "Player 1: let me in!";
+		int res;
 		InitClient();
+		//quick test:
+		printf("Sending quicktest:\n");
+		//sendto(serverSocket, greeting, 21, NULL, NULL, 0);
+		res = send(clientSocket, greeting, 21, NULL);
+		if (res == SOCKET_ERROR) {
+			printf("Oops. This socket error happened sending the quicktest: %d\n", res);
+		}
+		else printf("Quicktest sent, no problem.\n");
 	}
 
 }
